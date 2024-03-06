@@ -1,26 +1,32 @@
 package fr.plaglefleau.nfcreader
 
-import android.R.attr.tag
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentFilter
-import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.nfc.tech.Ndef
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
 import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme
+import retrofit2.http.POST
 
 
 class MainActivity : ComponentActivity() {
@@ -31,6 +37,11 @@ class MainActivity : ComponentActivity() {
     private val intentFiltersArray: Array<IntentFilter>? = null
     private val techListsArray: Array<Array<String>>? = null
 
+    val tagValueState = mutableStateOf("")
+
+    lateinit var binding: MainActivity
+
+    @RequiresApi(Build.VERSION_CODES.GINGERBREAD_MR1)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //new android stuff
@@ -54,57 +65,127 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        //start waiting to an nfc tag
+        //start waiting to a nfc tag
         pendingIntent = PendingIntent.getActivity(
             this, 0,
             Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE
         )
 
+
+
     }
 
     override fun onResume() {
         super.onResume()
-        //enabling the nfc when the app resume
-        nfcAdapter?.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, techListsArray)
+        val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            PendingIntent.FLAG_MUTABLE
+        )
+        val intentFilters = arrayOf<IntentFilter>(
+            IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED),
+            IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED),
+            IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED)
+        )
+        nfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFilters, null)
     }
 
     override fun onPause() {
         super.onPause()
-        //disabling the nfc when the app is in pause and if the phone has the nfc
-        if(nfcAdapter != null) {
-            nfcAdapter?.disableForegroundDispatch(this)
-        }
+        val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        nfcAdapter.disableForegroundDispatch(this)
     }
 
     override fun onNewIntent(intent: Intent?) {
-        //code run when you place the nfc tag
-        if (intent != null) {
-            tag = getTag(intent)
-            if(tag != "") {
-                Toast.makeText(this, tag, Toast.LENGTH_LONG).show()
-                Log.d("nfcReaderTag", tag)
+        super.onNewIntent(intent)
+        if (intent?.action == NfcAdapter.ACTION_TAG_DISCOVERED) {
+            val tag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(NfcAdapter.EXTRA_TAG, Tag::class.java)
+            } else {
+                intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+            }
+            tag?.id?.let {
+                val tagValue = it.toHexString()
+                //ici tag value correspond à l id du tag
+                Toast.makeText(this, "NFC tag detected: $tagValue", Toast.LENGTH_SHORT).show()
+                tagValueState.value = tagValue
+
+
+/*                GlobalScope.launch(Dispatchers.Main) {
+                    val tagID = tagValue
+                    val response = API.api.getSoldeCarte(tagID)
+                    if(response!= null) {
+                        if (response.isSuccessful && response.body() != null) {
+                                Toast.makeText(this@MainActivity, response.body()!!.cardBalance.toString(), Toast.LENGTH_SHORT).show()
+                        }
+                        else {
+                            Log.d("Cashless_Log", "GetButton :\n${response.code()} : ${response.message()}")
+                            Toast.makeText(this@MainActivity,"${response.code()} : ${response.message()}",Toast.LENGTH_LONG).show()
+                        }
+                    }
+
+                }*/
+                GlobalScope.launch(Dispatchers.Main) {
+                try {
+                    val tagID = tagValue
+                    val response = API.api.getSoldeCarte(tagID)
+                    //val response = API.api.getPostById(1)
+
+
+                    if (response.isSuccessful && response.body() != null) {
+                        //val content = response.body()
+                        Toast.makeText(this@MainActivity, response.body()!!.cardBalance.toString(), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error Occurred: ${response.message()}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Error Occurred: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+
+
             }
         }
-        super.onNewIntent(intent)
+
+
     }
 
-    private fun getTag(intent: Intent): String {
-        //we read the tag here
-        val tag:Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
-        if(tag == null) {
-            Toast.makeText(this, "couldn't read the nfc", Toast.LENGTH_SHORT).show()
-            return ""
+
+    private fun ByteArray.toHexString(): String {
+        val hexChars = "0123456789ABCDEF"
+        val result = StringBuilder(size * 2)
+
+        map { byte ->
+            val value = byte.toInt()
+            val hexChar1 = hexChars[value shr 4 and 0x0F]
+            val hexChar2 = hexChars[value and 0x0F]
+            result.append(hexChar1)
+            result.append(hexChar2)
         }
-        //I transform the tag id from a ByteArray to a String
-        return String(tag.id)
+
+        return result.toString()
     }
+
+
 
     //new android stuff
     @Composable
     fun Greeting(name: String, modifier: Modifier = Modifier) {
+        val tagValue = tagValueState.value
         Text(
-            text = "Hello $name!",
+            text = "Hello : $name! $tagValue",
+
             modifier = modifier
         )
     }
@@ -113,7 +194,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun GreetingPreview() {
         NfcReaderTheme {
-            Greeting("Android")
+            Greeting("Android ")
         }
     }
 }
