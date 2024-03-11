@@ -11,6 +11,7 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,9 +25,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
-import fr.plaglefleau.nfcreader.response.EnvoieTag
 import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme
-import retrofit2.Response
+import retrofit2.http.POST
 
 
 class MainActivity : ComponentActivity() {
@@ -129,15 +129,13 @@ class MainActivity : ComponentActivity() {
                 GlobalScope.launch(Dispatchers.Main) {
                 try {
                     val tagID = tagValue
-                    val response = API.api.getSoldeCarte(EnvoieTag(tagID))
+                    val response = API.api.getSoldeCarte(tagID)
                     //val response = API.api.getPostById(1)
 
 
                     if (response.isSuccessful && response.body() != null) {
-                        val content = response.body()
-
+                        //val content = response.body()
                         Toast.makeText(this@MainActivity, response.body()!!.cardBalance.toString(), Toast.LENGTH_SHORT).show()
-
                     } else {
                         Toast.makeText(
                             this@MainActivity,
@@ -185,14 +183,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun Greeting(name: String, modifier: Modifier = Modifier) {
         val tagValue = tagValueState.value
-
-        val carteBalance = CarteBalanceResponse(null , "")
-
-
-
-
         Text(
-            text = "Hello : $name! $tagValue  $carteBalance ",
+            text = "Hello : $name! $tagValue",
 
             modifier = modifier
         )
@@ -203,7 +195,6 @@ class MainActivity : ComponentActivity() {
     fun GreetingPreview() {
         NfcReaderTheme {
             Greeting("Android ")
-
         }
     }
 }
