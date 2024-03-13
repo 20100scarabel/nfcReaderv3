@@ -13,7 +13,7 @@ interface ApiCashless {
     //recupere un Double qui peut etre NULL + un String ^^*/
 
     @POST("api/data") //route pour recuperer le sold    //@Headers
-    suspend fun getSoldeCarte(@Body tagID: EnvoieTag) : Response<CarteBalanceResponse>
+    suspend fun getSoldeCarte(@Body envoieTag: EnvoieTag) : Response<CarteBalanceResponse>
 
     /*@GET("")
     suspend fun getBalance(@Path balance:):Response<CarteBalanceResponse>*/

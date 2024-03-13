@@ -11,7 +11,6 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
+import androidx.databinding.DataBindingUtil
+import fr.plaglefleau.nfcreader.databinding.ActivityMainBinding
+import fr.plaglefleau.nfcreader.response.EnvoieTag
 import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme
-import retrofit2.http.POST
+
 
 
 class MainActivity : ComponentActivity() {
@@ -34,16 +35,41 @@ class MainActivity : ComponentActivity() {
     private var nfcAdapter: NfcAdapter? = null
     private var pendingIntent: PendingIntent? = null
     private var tag:String = ""
+
     private val intentFiltersArray: Array<IntentFilter>? = null
     private val techListsArray: Array<Array<String>>? = null
 
+    var carteBalance: String? = null
+
+
+
     val tagValueState = mutableStateOf("")
 
-    lateinit var binding: MainActivity
+
+
+
+
+
+    lateinit var binding: ActivityMainBinding
+
+
+
+
+
+
 
     @RequiresApi(Build.VERSION_CODES.GINGERBREAD_MR1)
     override fun onCreate(savedInstanceState: Bundle?) {
+        /*GlobalScope.launch(Dispatchers.Main) {
+            API.api.getSoldeCarte("046c3e6a546080")
+        }*/
+
+
         super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.activity_main)
+        binding=DataBindingUtil.setContentView(this,R.layout.activity_main)
+
         //new android stuff
         setContent {
             NfcReaderTheme {
@@ -71,6 +97,7 @@ class MainActivity : ComponentActivity() {
             Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE
         )
+
 
 
 
@@ -128,14 +155,32 @@ class MainActivity : ComponentActivity() {
                 }*/
                 GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    val tagID = tagValue
-                    val response = API.api.getSoldeCarte(tagID)
+                    val TAG_ID = tagValue
+                    //val response = API.api.getSoldeCarte(tagID)
+                    val response = API.api.getSoldeCarte(EnvoieTag(TAG_ID))
+
+
+
                     //val response = API.api.getPostById(1)
 
 
                     if (response.isSuccessful && response.body() != null) {
                         //val content = response.body()
                         Toast.makeText(this@MainActivity, response.body()!!.cardBalance.toString(), Toast.LENGTH_SHORT).show()
+
+
+
+                        //val balanceText = "Solde de la carte : ${carteBalance}, Réponse : ${carteBalance}"
+
+                        //binding.textViewReponseBalance.setText(balanceText)
+
+
+                        //binding.textViewReponseBalance.setText(CarteBalanceResponse(carteBalance.toString()))
+
+
+
+
+
                     } else {
                         Toast.makeText(
                             this@MainActivity,
@@ -183,12 +228,17 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun Greeting(name: String, modifier: Modifier = Modifier) {
         val tagValue = tagValueState.value
+
+
         Text(
-            text = "Hello : $name! $tagValue",
+            text = "Hello : $name! $tagValue   ",
 
             modifier = modifier
         )
+
     }
+    
+
 
     @Preview(showBackground = true)
     @Composable
