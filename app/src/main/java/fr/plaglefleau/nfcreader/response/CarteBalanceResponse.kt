@@ -1,5 +1,7 @@
 package fr.plaglefleau.nfcreader.response
 
+import androidx.compose.material3.TextField
+import androidx.compose.ui.text.input.TextFieldValue
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 data class CarteBalanceResponse(
@@ -18,7 +20,12 @@ data class CarteBalanceResponse(
         //this.responseString = responseString
 
         return "($cardBalance) $responseString \n"
+
+
+
+
     }
+
 
 
 

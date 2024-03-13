@@ -4,6 +4,7 @@ package fr.plaglefleau.nfcreader
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
+import fr.plaglefleau.nfcreader.response.EnvoieTag
 //import fr.plaglefleau.nfcreader.response.ApiService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -31,6 +32,7 @@ object API {
 
     fun parseJsonToCarteBalanceResponse(jsonString: String): CarteBalanceResponse {
         return gson.fromJson(jsonString, CarteBalanceResponse::class.java)
+
     }
 
 
