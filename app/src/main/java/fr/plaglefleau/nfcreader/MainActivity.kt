@@ -26,9 +26,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.databinding.DataBindingUtil
+import fr.plaglefleau.nfcreader.databinding.ActivityMainBinding
 import fr.plaglefleau.nfcreader.response.EnvoieTag
-import androidx.databinding.ViewDataBinding
-import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
 import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme
 
 
@@ -239,7 +238,6 @@ class MainActivity : ComponentActivity() {
         )
 
     }
-
 
 
 
