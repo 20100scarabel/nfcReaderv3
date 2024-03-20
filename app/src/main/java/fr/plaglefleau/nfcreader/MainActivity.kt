@@ -19,13 +19,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.databinding.DataBindingUtil
-import fr.plaglefleau.nfcreader.databinding.ActivityMainBinding
 import fr.plaglefleau.nfcreader.response.EnvoieTag
+import androidx.databinding.ViewDataBinding
+import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
 import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme
 
 
@@ -35,11 +38,10 @@ class MainActivity : ComponentActivity() {
     private var nfcAdapter: NfcAdapter? = null
     private var pendingIntent: PendingIntent? = null
     private var tag:String = ""
-
     private val intentFiltersArray: Array<IntentFilter>? = null
     private val techListsArray: Array<Array<String>>? = null
 
-    var carteBalance: String? = null
+    var carteBalance: Double? = null
 
 
 
@@ -237,7 +239,8 @@ class MainActivity : ComponentActivity() {
         )
 
     }
-    
+
+
 
 
     @Preview(showBackground = true)
