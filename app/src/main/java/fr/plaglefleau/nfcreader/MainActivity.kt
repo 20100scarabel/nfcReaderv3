@@ -11,20 +11,21 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.databinding.DataBindingUtil
 import fr.plaglefleau.nfcreader.databinding.ActivityMainBinding
 import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
@@ -41,12 +42,13 @@ class MainActivity : ComponentActivity() {
     private val intentFiltersArray: Array<IntentFilter>? = null
     private val techListsArray: Array<Array<String>>? = null
 
+
+
     var carteBalance: Double? = null
 
 
-
     val tagValueState = mutableStateOf("")
-
+    val cardBalanceState = mutableStateOf("")
 
 
 
@@ -70,8 +72,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-        //huppermage > steamer
-        binding=DataBindingUtil.setContentView(this,R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        //binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
         //new android stuff
         setContent {
@@ -167,10 +169,14 @@ class MainActivity : ComponentActivity() {
                         //val content = response.body()
                         Toast.makeText(this@MainActivity, response.body()!!.cardBalance.toString(), Toast.LENGTH_SHORT).show()
 
-                        binding.textViewTest.setText(carteBalance.toString())
-                        //val balanceText = "Solde de la carte : ${carteBalance}, Réponse : ${carteBalance}"
 
-                        //binding.textViewReponseBalance.setText(balanceText)
+                        //binding.textViewTest.setText(carteBalance.toString())
+                        var balanceText = "Solde de la carte : ${carteBalance}, Réponse : ${carteBalance}"
+                        var valeur = response.body()!!.cardBalance.toString()
+                        //binding.textViewReponseBalance.text = carteBalance?.toString() ?: "N/A"
+                        //val texview = findViewById<TextView>(R.id.textViewReponseBalance)
+                        //binding.textViewReponseBalance.setText(${carteBalance}.toString())
+                        cardBalanceState.value = valeur
 
 
                         //binding.textViewReponseBalance.setText(CarteBalanceResponse(carteBalance.toString()))
@@ -226,23 +232,39 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun Greeting(name: String, modifier: Modifier = Modifier) {
         val tagValue = tagValueState.value
+        val cardBalanceState = cardBalanceState.value
 
 
         Text(
-            text = "Hello : $name! $tagValue   ",
+            text = "Hello : $name! $tagValue $cardBalanceState  ",
 
             modifier = modifier
         )
 
+
     }
-
-
-
     @Preview(showBackground = true)
     @Composable
     fun GreetingPreview() {
         NfcReaderTheme {
             Greeting("Android ")
         }
+    }
+
+
+    @Composable
+    fun MyButton(onClick: () -> Unit) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Valider ?")
+        }
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun MyButtonPreview() {
+        MyButton(onClick = {})
     }
 }
