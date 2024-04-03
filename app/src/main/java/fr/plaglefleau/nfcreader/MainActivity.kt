@@ -27,8 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.databinding.DataBindingUtil
 import fr.plaglefleau.nfcreader.databinding.ActivityMainBinding
+import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
 import fr.plaglefleau.nfcreader.response.EnvoieTag
-import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme
+import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme//huppermage > steamer
 
 
 
@@ -69,6 +70,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
+        //huppermage > steamer
         binding=DataBindingUtil.setContentView(this,R.layout.activity_main)
 
         //new android stuff
@@ -102,7 +104,7 @@ class MainActivity : ComponentActivity() {
 
 
 
-    }
+    }//huppermage > steamer
 
     override fun onResume() {
         super.onResume()
@@ -124,7 +126,7 @@ class MainActivity : ComponentActivity() {
         val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         nfcAdapter.disableForegroundDispatch(this)
     }
-
+    //huppermage > steamer
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (intent?.action == NfcAdapter.ACTION_TAG_DISCOVERED) {
@@ -159,18 +161,13 @@ class MainActivity : ComponentActivity() {
                     val TAG_ID = tagValue
                     //val response = API.api.getSoldeCarte(tagID)
                     val response = API.api.getSoldeCarte(EnvoieTag(TAG_ID))
-
-
-
                     //val response = API.api.getPostById(1)
-
 
                     if (response.isSuccessful && response.body() != null) {
                         //val content = response.body()
                         Toast.makeText(this@MainActivity, response.body()!!.cardBalance.toString(), Toast.LENGTH_SHORT).show()
 
-
-
+                        binding.textViewTest.setText(carteBalance.toString())
                         //val balanceText = "Solde de la carte : ${carteBalance}, Réponse : ${carteBalance}"
 
                         //binding.textViewReponseBalance.setText(balanceText)
