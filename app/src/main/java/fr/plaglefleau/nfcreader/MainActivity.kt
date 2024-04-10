@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.databinding.DataBindingUtil
+import fr.plaglefleau.nfcreader.affichage.LoginForm
 import fr.plaglefleau.nfcreader.databinding.ActivityMainBinding
 import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
 import fr.plaglefleau.nfcreader.response.EnvoieTag
@@ -75,8 +76,15 @@ class MainActivity : ComponentActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         //binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
+
+        setContent{
+            NfcReaderTheme {
+                LoginForm()
+            }
+        }
+
         //new android stuff
-        setContent {
+/*        setContent {
             NfcReaderTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -86,7 +94,8 @@ class MainActivity : ComponentActivity() {
                     Greeting("Android")
                 }
             }
-        }
+        }*/
+
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
 
@@ -106,7 +115,7 @@ class MainActivity : ComponentActivity() {
 
 
 
-    }//huppermage > steamer
+    }
 
     override fun onResume() {
         super.onResume()
@@ -128,7 +137,7 @@ class MainActivity : ComponentActivity() {
         val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         nfcAdapter.disableForegroundDispatch(this)
     }
-    //huppermage > steamer
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (intent?.action == NfcAdapter.ACTION_TAG_DISCOVERED) {
@@ -235,6 +244,7 @@ class MainActivity : ComponentActivity() {
         val cardBalanceState = cardBalanceState.value
 
 
+
         Text(
             text = "Hello : $name! $tagValue $cardBalanceState  ",
 
@@ -248,23 +258,35 @@ class MainActivity : ComponentActivity() {
     fun GreetingPreview() {
         NfcReaderTheme {
             Greeting("Android ")
+            
         }
+
+
     }
 
 
     @Composable
-    fun MyButton(onClick: () -> Unit) {
-        Button(
-            onClick = onClick,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text("Valider ?")
+    fun ButtonValider(onClick: () -> Unit) {
+        Button(onClick = { onClick() }) {
+
+            Modifier.padding(
+                start = 16.dp,
+                top = 20.dp,
+                end = 16.dp,
+                bottom = 16.dp
+            )
+            Text("Tonal")
         }
     }
 
-    @Preview(showBackground = true)
+
+    /*@Preview(showBackground = true)
     @Composable
     fun MyButtonPreview() {
         MyButton(onClick = {})
-    }
+    }*/
+
+
+
+
 }
