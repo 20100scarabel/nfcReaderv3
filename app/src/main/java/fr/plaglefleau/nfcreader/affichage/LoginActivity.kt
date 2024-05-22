@@ -1,5 +1,4 @@
-/*
-package fr.plaglefleau.nfcreader.affichage
+/*package fr.plaglefleau.nfcreader.affichage
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

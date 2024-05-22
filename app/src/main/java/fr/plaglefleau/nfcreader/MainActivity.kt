@@ -11,31 +11,35 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.databinding.DataBindingUtil
-import fr.plaglefleau.nfcreader.affichage.LoginForm
+import fr.plaglefleau.nfcreader.affichage.*
+
 import fr.plaglefleau.nfcreader.databinding.ActivityMainBinding
-import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
 import fr.plaglefleau.nfcreader.response.EnvoieTag
-import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme//huppermage > steamer
+import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme
+//import fr.plaglefleau.nfcreader.affichage.LoginForm
 
 
 
-class MainActivity : ComponentActivity() {
+public class MainActivity() : ComponentActivity() {
+
+
+
+    private var monIterator : MonIterator = MonIterator()
+    private var isLoggedIn : Boolean = false
 
     private var nfcAdapter: NfcAdapter? = null
     private var pendingIntent: PendingIntent? = null
@@ -50,6 +54,7 @@ class MainActivity : ComponentActivity() {
 
     val tagValueState = mutableStateOf("")
     val cardBalanceState = mutableStateOf("")
+    var modifSoldeValue by mutableStateOf("")
 
 
 
@@ -60,31 +65,36 @@ class MainActivity : ComponentActivity() {
 
 
 
-
-
-
     @RequiresApi(Build.VERSION_CODES.GINGERBREAD_MR1)
     override fun onCreate(savedInstanceState: Bundle?) {
         /*GlobalScope.launch(Dispatchers.Main) {
             API.api.getSoldeCarte("046c3e6a546080")
         }*/
-
-
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_main)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        //binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
+            setContent {
+                NfcReaderTheme {
+                    if (!flag) {
+                        loginForm()
+                    } else {
+                        Greeting("Android")
+
+                    }
+                }
+            }
 
 
+
+/*
         setContent{
             NfcReaderTheme {
                 LoginForm()
             }
         }
+*/
 
-        //new android stuff
-/*        setContent {
+/*        //new android stuff
+        setContent {
             NfcReaderTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -148,6 +158,7 @@ class MainActivity : ComponentActivity() {
             }
             tag?.id?.let {
                 val tagValue = it.toHexString()
+                //val tagModif = TextFielSolds().toString()
                 //ici tag value correspond à l id du tag
                 Toast.makeText(this, "NFC tag detected: $tagValue", Toast.LENGTH_SHORT).show()
                 tagValueState.value = tagValue
@@ -170,8 +181,12 @@ class MainActivity : ComponentActivity() {
                 GlobalScope.launch(Dispatchers.Main) {
                 try {
                     val TAG_ID = tagValue
+                    val modifSolde = modifSoldeValue
+
+
+
                     //val response = API.api.getSoldeCarte(tagID)
-                    val response = API.api.getSoldeCarte(EnvoieTag(TAG_ID))
+                    val response = API.api.getSoldeCarte(EnvoieTag(TAG_ID ,modifSolde ))
                     //val response = API.api.getPostById(1)
 
                     if (response.isSuccessful && response.body() != null) {
@@ -243,13 +258,119 @@ class MainActivity : ComponentActivity() {
         val tagValue = tagValueState.value
         val cardBalanceState = cardBalanceState.value
 
-
-
-        Text(
-            text = "Hello : $name! $tagValue $cardBalanceState  ",
-
+        Column(
             modifier = modifier
-        )
+                .padding(20.dp)  // Padding autour de la colonne pour éviter que les éléments soient collés aux bords de l'écran
+                .fillMaxWidth()  // Remplir toute la largeur disponible
+        ){
+            Text(
+                text = "Hello : $name! $tagValue $cardBalanceState  ",
+                modifier = modifier
+            )
+            var MODIF_SOLDE by remember { mutableStateOf("") }
+
+            TextField(
+                value = "ID du tag = " + tagValue ,
+                onValueChange = {tagValue
+                },
+                modifier = Modifier
+                    .padding(30.dp),
+                label = { Text("Tagvalue") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
+            TextField(
+                value = MODIF_SOLDE,
+                onValueChange = { newText ->
+                    MODIF_SOLDE = newText
+                },
+                modifier = Modifier
+                    .padding(30.dp),
+                label = { Text("Enter only digits") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(80.dp))
+            Button(
+                onClick = {
+                    val modifSoldeValue = MODIF_SOLDE
+                     if (MODIF_SOLDE.isNotEmpty() && tagValueState.value.isNotEmpty()){
+
+                     }
+
+                    when {
+                        MODIF_SOLDE.isEmpty() -> {
+                            Toast.makeText(this@MainActivity, "Solde vide", Toast.LENGTH_SHORT).show()
+                        }
+                        tagValueState.value.isEmpty() -> {
+                            Toast.makeText(this@MainActivity, "Scanner une carte", Toast.LENGTH_SHORT).show()
+                        }
+                        else -> {
+                            val modifSoldeValue = MODIF_SOLDE
+/*
+                            GlobalScope.launch(Dispatchers.Main) {
+                                try {
+                                    val TAG_ID = tagValue
+                                    val modifSolde = modifSoldeValue
+
+
+                                    val response = API.api.getSoldeCarte(EnvoieTag(TAG_ID ,modifSolde ))
+                                    if (response.isSuccessful && response.body() != null) {
+                                        //Toast.makeText(this@MainActivity, response.body()!!.cardBalance.toString(), Toast.LENGTH_SHORT).show()
+                                        var balanceText = "Solde de la carte : ${carteBalance}, Réponse : ${carteBalance}"
+                                        var valeur = response.body()!!.cardBalance.toString()
+                                        //cardBalanceState.value = valeur
+
+                                    } else {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Error Occurred: ${response.message()}",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Error Occurred: ${e.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+*/
+
+
+
+
+                        }
+                    }
+                },
+
+                modifier = Modifier.padding(20.dp )
+                    .fillMaxWidth()
+            ) {
+                Text("Confirmer")
+            }
+
+            Spacer(modifier = Modifier.height(90.dp))
+            TextField(
+                value = PwdBool.value,
+                onValueChange = { newValue ->
+                    PwdBool.value = newValue
+                },
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                label = { Text("Enter text here") }
+            )
+        }
+
+        }
+
+
 
 
     }
@@ -257,7 +378,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun GreetingPreview() {
         NfcReaderTheme {
-            Greeting("Android ")
+            Greeting("android")
             
         }
 
@@ -265,19 +386,17 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    @Composable
-    fun ButtonValider(onClick: () -> Unit) {
-        Button(onClick = { onClick() }) {
 
-            Modifier.padding(
-                start = 16.dp,
-                top = 20.dp,
-                end = 16.dp,
-                bottom = 16.dp
-            )
-            Text("Tonal")
-        }
-    }
+
+
+
+
+/*    @Preview
+    @Composable
+    fun PreviewButton() {
+        MyButton(onClick = {})
+    }*/
+
 
 
     /*@Preview(showBackground = true)
@@ -289,4 +408,3 @@ class MainActivity : ComponentActivity() {
 
 
 
-}

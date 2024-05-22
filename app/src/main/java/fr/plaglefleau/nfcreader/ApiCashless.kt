@@ -1,7 +1,6 @@
 package fr.plaglefleau.nfcreader
 
-import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
-import fr.plaglefleau.nfcreader.response.EnvoieTag
+import fr.plaglefleau.nfcreader.response.*
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -18,6 +17,8 @@ interface ApiCashless {
     /*@GET("")
     suspend fun getBalance(@Path balance:):Response<CarteBalanceResponse>*/
 
+    @POST("api/connexion") //route pour recuperer    //@Headers
+    suspend fun getPWD(@Body envoieLoginPdw: EEnvoieLoginPwd) : Response<EnvoieLoginPwdResponse>
 
 
 }
