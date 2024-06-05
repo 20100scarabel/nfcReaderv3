@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName
 public data class CarteBalanceResponse(
     @SerializedName("numeroCarte")
     var responseString: String,
-    @SerializedName("soldeCarte")
+    @SerializedName("NouveauSolde")
     var cardBalance: Double?
 ) {
     override fun toString(): String {

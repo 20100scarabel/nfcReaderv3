@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,8 +31,9 @@ import fr.plaglefleau.nfcreader.affichage.*
 import fr.plaglefleau.nfcreader.databinding.ActivityMainBinding
 import fr.plaglefleau.nfcreader.response.EnvoieTag
 import fr.plaglefleau.nfcreader.ui.theme.NfcReaderTheme
-//import fr.plaglefleau.nfcreader.affichage.LoginForm
-
+import fr.plaglefleau.nfcreader.affichage.PageChoix
+import fr.plaglefleau.nfcreader.response.EnvoieJusteTAG
+import fr.plaglefleau.nfcreader.response.ResponseJusteTAG
 
 
 public class MainActivity() : ComponentActivity() {
@@ -46,15 +48,16 @@ public class MainActivity() : ComponentActivity() {
     private var tag:String = ""
     private val intentFiltersArray: Array<IntentFilter>? = null
     private val techListsArray: Array<Array<String>>? = null
-
-
+    private var iterator2: Int = 0
+    //public var solde : String =""
 
     var carteBalance: Double? = null
 
 
     val tagValueState = mutableStateOf("")
     val cardBalanceState = mutableStateOf("")
-    var modifSoldeValue by mutableStateOf("")
+    var solde  = mutableStateOf("")
+    //var modifSoldeValue by mutableStateOf("")
 
 
 
@@ -71,13 +74,20 @@ public class MainActivity() : ComponentActivity() {
             API.api.getSoldeCarte("046c3e6a546080")
         }*/
         super.onCreate(savedInstanceState)
+
+
         setContentView(R.layout.activity_main)
+
             setContent {
                 NfcReaderTheme {
-                    if (!flag) {
-                        loginForm()
+                    if (flag == null){
+                        Greeting("")
+                    }
+                    else if (!flag!!) {
+                        loginForm(this@MainActivity)
                     } else {
-                        Greeting("Android")
+                       PageChoix()
+
 
                     }
                 }
@@ -164,21 +174,22 @@ public class MainActivity() : ComponentActivity() {
                 tagValueState.value = tagValue
 
 
-/*                GlobalScope.launch(Dispatchers.Main) {
+                GlobalScope.launch(Dispatchers.Main) {
                     val tagID = tagValue
-                    val response = API.api.getSoldeCarte(tagID)
+                    val response = API.api.getSoldeOnly(EnvoieJusteTAG(tagID))
                     if(response!= null) {
                         if (response.isSuccessful && response.body() != null) {
-                                Toast.makeText(this@MainActivity, response.body()!!.cardBalance.toString(), Toast.LENGTH_SHORT).show()
+                               solde.value = response.body()!!.responseJusteTAG
+                                Toast.makeText(this@MainActivity, response.body()!!.responseJusteTAG, Toast.LENGTH_SHORT).show()
                         }
                         else {
-                            Log.d("Cashless_Log", "GetButton :\n${response.code()} : ${response.message()}")
+                            //Log.d("Cashless_Log", "GetButton :\n${response.code()} : ${response.message()}")
                             Toast.makeText(this@MainActivity,"${response.code()} : ${response.message()}",Toast.LENGTH_LONG).show()
                         }
                     }
 
-                }*/
-                GlobalScope.launch(Dispatchers.Main) {
+                }
+                /*GlobalScope.launch(Dispatchers.Main) {
                 try {
                     val TAG_ID = tagValue
                     val modifSolde = modifSoldeValue
@@ -225,7 +236,7 @@ public class MainActivity() : ComponentActivity() {
                     ).show()
                 }
             }
-
+*/
 
 
             }
@@ -257,50 +268,93 @@ public class MainActivity() : ComponentActivity() {
     fun Greeting(name: String, modifier: Modifier = Modifier) {
         val tagValue = tagValueState.value
         val cardBalanceState = cardBalanceState.value
+        val solde = solde
 
         Column(
             modifier = modifier
                 .padding(20.dp)  // Padding autour de la colonne pour éviter que les éléments soient collés aux bords de l'écran
                 .fillMaxWidth()  // Remplir toute la largeur disponible
         ){
-            Text(
+/*            Text(
                 text = "Hello : $name! $tagValue $cardBalanceState  ",
                 modifier = modifier
-            )
+            )*/
+
             var MODIF_SOLDE by remember { mutableStateOf("") }
 
             TextField(
-                value = "ID du tag = " + tagValue ,
+                value = "ID du tag = " + tagValue,
                 onValueChange = {tagValue
                 },
                 modifier = Modifier
                     .padding(30.dp),
                 label = { Text("Tagvalue") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+            )
+            Spacer(modifier = Modifier.height(30.dp))
+
+            var AncienSolde by remember { mutableStateOf("") }
+
+            TextField(
+
+                value = solde.value,
+                onValueChange = { newText -> solde.value
+                },
+                modifier = Modifier
+                    .padding(30.dp),
+                label = { Text("Solde de la Carte") },
                 singleLine = true
             )
 
             Spacer(modifier = Modifier.height(30.dp))
-            TextField(
-                value = MODIF_SOLDE,
-                onValueChange = { newText ->
-                    MODIF_SOLDE = newText
-                },
-                modifier = Modifier
-                    .padding(30.dp),
-                label = { Text("Enter only digits") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true
-            )
+            if (textfildaffichage == true){
+
+            }else{
+                TextField(
+                    value = MODIF_SOLDE,
+                    onValueChange = { newText ->
+                        var temp = MODIF_SOLDE.toCharArray()
+
+                        if (debiteur && iterator2 == 0){
+                            iterator2++
+                            MODIF_SOLDE = "-" + newText
+                        }else if(temp[0] != '-'){
+                            MODIF_SOLDE = "-" + newText
+                        }
+                        else if(debiteur){
+                            MODIF_SOLDE = newText
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(30.dp),
+                    label = { Text("Enter only digits") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
+                )
+            }
+
 
             Spacer(modifier = Modifier.height(80.dp))
             Button(
                 onClick = {
-                    val modifSoldeValue = MODIF_SOLDE
-                     if (MODIF_SOLDE.isNotEmpty() && tagValueState.value.isNotEmpty()){
+//                    val modifSoldeValue = MODIF_SOLDE
+//                     if (MODIF_SOLDE.isNotEmpty() && tagValueState.value.isNotEmpty()){
+//
+//                     }
 
-                     }
 
+
+//                    var temp = MODIF_SOLDE.toCharArray()
+//                    if(temp[0] == '-'){
+//                        MODIF_SOLDE = temp[1] + temp[temp.size]
+//
+//                    }
+
+                    /*if (solde.value.toInt() < a.toInt()){
+                        Toast.makeText(this@MainActivity, "solde négatif", Toast.LENGTH_SHORT).show()
+
+                    }else*/
                     when {
                         MODIF_SOLDE.isEmpty() -> {
                             Toast.makeText(this@MainActivity, "Solde vide", Toast.LENGTH_SHORT).show()
@@ -308,18 +362,19 @@ public class MainActivity() : ComponentActivity() {
                         tagValueState.value.isEmpty() -> {
                             Toast.makeText(this@MainActivity, "Scanner une carte", Toast.LENGTH_SHORT).show()
                         }
+
+
                         else -> {
                             val modifSoldeValue = MODIF_SOLDE
-/*
                             GlobalScope.launch(Dispatchers.Main) {
                                 try {
                                     val TAG_ID = tagValue
                                     val modifSolde = modifSoldeValue
 
 
-                                    val response = API.api.getSoldeCarte(EnvoieTag(TAG_ID ,modifSolde ))
+                                    val response = API.api.getSoldeCarte(EnvoieTag(TAG_ID ,MODIF_SOLDE ))
                                     if (response.isSuccessful && response.body() != null) {
-                                        //Toast.makeText(this@MainActivity, response.body()!!.cardBalance.toString(), Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this@MainActivity, "Solde Modifier", Toast.LENGTH_SHORT).show()
                                         var balanceText = "Solde de la carte : ${carteBalance}, Réponse : ${carteBalance}"
                                         var valeur = response.body()!!.cardBalance.toString()
                                         //cardBalanceState.value = valeur
@@ -340,7 +395,6 @@ public class MainActivity() : ComponentActivity() {
                                     ).show()
                                 }
                             }
-*/
 
 
 
@@ -355,7 +409,7 @@ public class MainActivity() : ComponentActivity() {
                 Text("Confirmer")
             }
 
-            Spacer(modifier = Modifier.height(90.dp))
+/*            Spacer(modifier = Modifier.height(90.dp))
             TextField(
                 value = PwdBool.value,
                 onValueChange = { newValue ->
@@ -365,7 +419,24 @@ public class MainActivity() : ComponentActivity() {
                     .padding(16.dp)
                     .fillMaxWidth(),
                 label = { Text("Enter text here") }
+            )*/
+
+            Button(
+                onClick = {
+                    flag = true
+                    textfildaffichage = false
+                    this@MainActivity.startActivity(Intent(this@MainActivity, MainActivity()::class.java))
+                },
+
+                modifier = Modifier.padding(50.dp).fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red, // Changer la couleur
+                    contentColor = Color.White // Changer la couleur
+                )
             )
+            {
+                Text("Retour")
+            }
         }
 
         }

@@ -1,11 +1,12 @@
 package fr.plaglefleau.nfcreader
 
 
+import androidx.compose.runtime.MutableState
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import fr.plaglefleau.nfcreader.response.CarteBalanceResponse
 import fr.plaglefleau.nfcreader.response.EnvoieTag
-//import fr.plaglefleau.nfcreader.response.ApiService
+import fr.plaglefleau.nfcreader.affichage.ipAddressAPI
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -13,21 +14,42 @@ import retrofit2.converter.gson.GsonConverterFactory
 object API {
 
 
-    private val AdresseURL = "http://10.0.0.130:3000/"
+    //private val AdresseURL = "http://10.0.0.130:3000/"
+    //private val AdresseURL = "http://10.0.0.129:3000/"
+    public lateinit var ape : ApiCashless
+
+    var AdresseURL = ipAddressAPI
+
+fun aPE (){
+     ape =
+        Retrofit.Builder()
+            .baseUrl(AdresseURL) //adresse du serveur d'application de maxime P
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ApiCashless::class.java)
+
+
+
+}
+
     private val gson : Gson by lazy {
         GsonBuilder().setLenient().create()
+
     }
 
     private val httpClient : OkHttpClient by lazy {
         OkHttpClient.Builder().build()
     }
 
-    val api =
+    var api =
         Retrofit.Builder()
-        .baseUrl(AdresseURL) //adresse du serveur d'application de maxime P
+        .baseUrl(AdresseURL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(ApiCashless::class.java)
+
+
+
 
 
     fun parseJsonToCarteBalanceResponse(jsonString: String): CarteBalanceResponse {

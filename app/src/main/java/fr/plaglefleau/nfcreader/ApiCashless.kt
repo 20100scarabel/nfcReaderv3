@@ -18,7 +18,13 @@ interface ApiCashless {
     suspend fun getBalance(@Path balance:):Response<CarteBalanceResponse>*/
 
     @POST("api/connexion") //route pour recuperer    //@Headers
-    suspend fun getPWD(@Body envoieLoginPdw: EEnvoieLoginPwd) : Response<EnvoieLoginPwdResponse>
+    suspend fun getPWD(@Body envoieLoginPdw: EnvoieLoginPwd) : Response<EnvoieLoginPwdResponse>
+
+    @POST("api/solde")
+    suspend fun getSoldeOnly(@Body envoieJusteTAG: EnvoieJusteTAG) : Response<ResponseJusteTAG>
+
+
+
 
 
 }
