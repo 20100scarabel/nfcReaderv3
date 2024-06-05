@@ -308,32 +308,18 @@ public class MainActivity() : ComponentActivity() {
             )
 
             Spacer(modifier = Modifier.height(30.dp))
-            if (textfildaffichage == true){
 
-            }else{
-                TextField(
-                    value = MODIF_SOLDE,
-                    onValueChange = { newText ->
-                        var temp = MODIF_SOLDE.toCharArray()
-
-                        if (debiteur && iterator2 == 0){
-                            iterator2++
-                            MODIF_SOLDE = "-" + newText
-                        }else if(temp[0] != '-'){
-                            MODIF_SOLDE = "-" + newText
-                        }
-                        else if(debiteur){
-                            MODIF_SOLDE = newText
-                        }
-                    },
-                    modifier = Modifier
-                        .padding(30.dp),
-                    label = { Text("Enter only digits") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true
-                )
-            }
-
+            TextField(
+                value = MODIF_SOLDE,
+                onValueChange = { newText ->
+                    MODIF_SOLDE = newText
+                },
+                modifier = Modifier
+                    .padding(30.dp),
+                label = { Text("Enter only digits") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
+            )
 
             Spacer(modifier = Modifier.height(80.dp))
             Button(
@@ -403,7 +389,7 @@ public class MainActivity() : ComponentActivity() {
                     }
                 },
 
-                modifier = Modifier.padding(20.dp )
+                modifier = Modifier.padding(10.dp )
                     .fillMaxWidth()
             ) {
                 Text("Confirmer")
@@ -424,11 +410,10 @@ public class MainActivity() : ComponentActivity() {
             Button(
                 onClick = {
                     flag = true
-                    textfildaffichage = false
                     this@MainActivity.startActivity(Intent(this@MainActivity, MainActivity()::class.java))
                 },
 
-                modifier = Modifier.padding(50.dp).fillMaxWidth(),
+                modifier = Modifier.padding(30.dp).fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Red, // Changer la couleur
                     contentColor = Color.White // Changer la couleur
